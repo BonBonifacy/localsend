@@ -195,7 +195,12 @@ Future<void> _pickFiles(BuildContext context, Ref ref) async {
 Future<void> _pickFolder(BuildContext context, Ref ref) async {
   if (checkPlatform([TargetPlatform.android])) {
     try {
-      await Permission.storage.request();
+      final sdkInt = ref.read(deviceInfoProvider).androidSdkInt ?? 0;
+      if (sdkInt >= 30) {
+        await Permission.manageExternalStorage.request();
+      } else {
+        await Permission.storage.request();
+      }
     } catch (e) {
       _logger.warning('Failed to request storage permission', e);
     }

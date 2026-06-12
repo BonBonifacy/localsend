@@ -407,9 +407,16 @@ class ReceiveController {
       for (final file in server.getState().session!.files.values.where((f) => f.token != null)) file.file.id: file.token,
     };
 
-    if (checkPlatform([TargetPlatform.android, TargetPlatform.iOS])) {
-      if (checkPlatform([TargetPlatform.android]) && !server.getState().session!.destinationDirectory.startsWith('/storage/emulated/0/Download')) {
-        // Android requires more permission to save files outside of the Download directory
+    if (checkPlatform([TargetPlatform.android])) {
+      final sdkInt = server.ref.read(deviceInfoProvider).androidSdkInt ?? 0;
+      if (sdkInt >= 30) {
+        try {
+          final result = await Permission.manageExternalStorage.request();
+          _logger.info('manageExternalStorage permission: $result');
+        } catch (e) {
+          _logger.warning('Could not request manageExternalStorage permission', e);
+        }
+      } else {
         try {
           final result = await Permission.storage.request();
           _logger.info('storage permission: $result');
@@ -417,6 +424,7 @@ class ReceiveController {
           _logger.warning('Could not request storage permission', e);
         }
       }
+    } else if (checkPlatform([TargetPlatform.iOS])) {
       try {
         await Permission.storage.request();
       } catch (e) {
