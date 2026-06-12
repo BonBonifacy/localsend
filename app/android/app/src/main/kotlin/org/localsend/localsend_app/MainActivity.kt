@@ -124,7 +124,11 @@ class MainActivity : FlutterActivity() {
                 val takeFlags: Int =
                     data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 if (uri != null) {
-                    contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    try {
+                        contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    } catch (e: SecurityException) {
+                        // Ignore if persistable permission is not supported
+                    }
 
                     val files = mutableListOf<FileInfo>()
                     listFiles(uri, files)
@@ -142,7 +146,11 @@ class MainActivity : FlutterActivity() {
                 val takeFlags: Int =
                     data.flags and (Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 if (uri != null) {
-                    contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    try {
+                        contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    } catch (e: SecurityException) {
+                        // Ignore if persistable permission is not supported
+                    }
                     pendingResult?.success(uri.toString())
                     pendingResult = null
                 } else {
@@ -174,7 +182,11 @@ class MainActivity : FlutterActivity() {
 
                 val resultList = mutableListOf<FileInfo>()
                 for (uri in uriList) {
-                    contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    try {
+                        contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    } catch (e: SecurityException) {
+                        // Ignore if persistable permission is not supported
+                    }
                     val documentFile = FastDocumentFile.fromDocumentUri(this, uri)
                     if (documentFile == null) {
                         pendingResult?.error("Error", "Failed to access file", null)
